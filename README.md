@@ -12,41 +12,41 @@ Gradle 本身就支持这种方式的配置，每个构建变体都代表不同�
 可以在模块级 build.gradle 文件的 android 代码块内部创建和配置构建类型。
 ```java
 //build.gradle 文件
- android {
-     ...
-     defaultConfig {
-         applicationId "com.flavordemo"
-         ...
-     }
-     buildTypes {//Android Studio 会默认自动创建debug和release这两种构建类型
-         release {
-             minifyEnabled false
-             manifestPlaceholders = [app_name: "app", app_icon: "@mipmap/ic_launcher"]
-             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-         }
+android {
+    ...
+    defaultConfig {
+        applicationId "com.flavordemo"
+        ...
+    }
+    buildTypes {//Android Studio 会默认自动创建debug和release这两种构建类型
+        release {
+            minifyEnabled false
+            manifestPlaceholders = [app_name: "app", app_icon: "@mipmap/ic_launcher"]
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
 
-         debug {
-             applicationIdSuffix ".debug"
-             manifestPlaceholders = [app_name: "app_debug", app_icon: "@mipmap/ic_launcher"]
-             debuggable true
-         }
+        debug {
+            applicationIdSuffix ".debug"
+            manifestPlaceholders = [app_name: "app_debug", app_icon: "@mipmap/ic_launcher"]
+            debuggable true
+        }
 
-         preview {//此处定义了一个构建类型preview，
-             initWith debug //该构建类型从debug构建类型复制属性
-             applicationIdSuffix ".preview"
-             manifestPlaceholders = [app_name: "app_preview", app_icon: "@mipmap/ic_launcher"] //可以利用该标签生成一些环境变量，如：meta-data
-         }
-     }
-     ...
- }
+        preview {//此处定义了一个构建类型preview，
+            initWith debug //该构建类型从debug构建类型复制属性
+            applicationIdSuffix ".preview"
+            manifestPlaceholders = [app_name: "app_preview", app_icon: "@mipmap/ic_launcher"] //可以利用该标签生成一些环境变量，如：meta-data
+        }
+    }
+    ...
+}
 ```
 ```java
- //AndroidManifest.xml
- <application
-     ...
-     android:icon="${app_icon}" //通过${}访问在manifestPlaceholders声明的值
-     android:label="${app_name}"
-     ...>
+//AndroidManifest.xml
+<application
+    ...
+    android:icon="${app_icon}" //通过${}访问在manifestPlaceholders声明的值
+    android:label="${app_name}"
+    ...>
 ```
 
 > PS：一般情况下，我们都不需要在 buildTypes 里增加自己的构建类型，默认的 debug 以及 release 已经足够，但是可以针对 debug 和 release 配置不同的属性，比如：release 版本需要混淆，签名文件不同，开启资源压缩等等。
