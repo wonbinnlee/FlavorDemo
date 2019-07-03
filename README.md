@@ -155,8 +155,7 @@ Android Studio 将会为debug构建类型创建源集目录，然后在该目录
 3. 从 Target Source Set 旁边的下拉菜单中，选择 debug。
 4. 点击 Finish。
 
-由于“debug”构建类型被指定为目标源集，Android Studio 会在创建 XML 文件时自动创建必要的目录。最终的目录结构看上去应该类似于下图：  
-
+由于“debug”构建类型被指定为目标源集，Android Studio 会在创建 XML 文件时自动创建必要的目录。最终的目录结构看上去应该类似于下图：
 ![创建源集](https://mmbiz.qpic.cn/mmbiz_png/KZYic25zrWRveqSibyaEWATpn9zTKHZNyq45dMQcVZRQNoT3eapoCxDsXESudleVsGyVu4zQyHC2PlibxSj1icgxTw/0?wx_fmt=png)
 
 按照同样的方法，还可以为产品风格创建源集目录（例如 src/stable/），为构建变体创建源集目录（例如 src/stableV2/）。此外，还可以创建针对特定构建变体的测试源集，例如 src/androidTestStableDebug/。下图为Android Studio提示的源集目录：
