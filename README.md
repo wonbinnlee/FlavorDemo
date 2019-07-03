@@ -34,8 +34,7 @@ Gradle 本身就支持这种方式的配置，每个构建变体都代表不同�
          preview {//此处定义了一个构建类型preview，
              initWith debug //该构建类型从debug构建类型复制属性
              applicationIdSuffix ".preview"
-             //可以利用该标签生成一些环境变量，如：meta-data
-             manifestPlaceholders = [app_name: "app_preview", app_icon: "@mipmap/ic_launcher"]
+             manifestPlaceholders = [app_name: "app_preview", app_icon: "@mipmap/ic_launcher"] //可以利用该标签生成一些环境变量，如：meta-data
          }
      }
      ...
@@ -57,8 +56,7 @@ Gradle 本身就支持这种方式的配置，每个构建变体都代表不同�
 //build.gradle 文件
 android {
    ...
-   //属于较高优先级风格维度的产品风格首先显示，之后是较低优先级维度的产品风格，再之后是构建类型。
-   flavorDimensions "channle", "version"
+   flavorDimensions "channle", "version" //属于较高优先级风格维度的产品风格首先显示，之后是较低优先级维度的产品风格，再之后是构建类型。
    productFlavors {
        dev { //所有风格必须属于指定的风格维度
            dimension "channle"
@@ -91,13 +89,11 @@ android {
 //BuildConfig.java
 public final class BuildConfig {
    public static final boolean DEBUG = Boolean.parseBoolean("true");
-   //根据产品风格的优先度生成的包名
-   public static final String APPLICATION_ID = "com.flavordemo.dev.debug";
+   public static final String APPLICATION_ID = "com.flavordemo.dev.debug"; //根据产品风格的优先度生成的包名
    public static final String BUILD_TYPE = "debug";
    public static final String FLAVOR = "devV1";
    public static final int VERSION_CODE = 10001;
-   //默认的版本号应该是1.0-dev，但是由于version纬度修改了版本号的命名规则，最后采用该纬度的规则
-   public static final String VERSION_NAME = "V1.1.0-dev";
+   public static final String VERSION_NAME = "V1.1.0-dev"; //默认的版本号应该是1.0-dev，但是由于version纬度修改了版本号的命名规则，最后采用该纬度的规则
    public static final String FLAVOR_channle = "dev";
    public static final String FLAVOR_version = "v1";
  }
@@ -120,13 +116,10 @@ Gradle 会配置的产品风格与构建类型的每个可能的组合创建构�
 android {
      ...
      variantFilter { variant ->
-         //获取完整的build variant名称，如：devV1Debug
-         def names = variant.getName()
-         //没有dev分支且release的版本，也没有stable分支且debug的版本
-         if ((names.contains("dev") && names.contains("Release"))
+         def names = variant.getName() //获取完整的build variant名称，如：devV1Debug
+         if ((names.contains("dev") && names.contains("Release")) //没有dev分支且release的版本，也没有stable分支且debug的版本
                  || (names.contains("stable") && names.contains("Debug"))) {
-             //设置忽略
-             setIgnore(true)
+             setIgnore(true) //设置忽略
          }
      }
      ...
@@ -176,8 +169,7 @@ android {
              java.srcDirs = ['other/java']
 
              //默认路径是'src/main/res'
-             //指定多个资源目录，比如res1资源，res2存放layout和values
-             res.srcDirs = ['other/res1', 'other/res2/layouts', 'other/res2/strings']
+             res.srcDirs = ['other/res1', 'other/res2/layouts', 'other/res2/strings'] //指定多个资源目录，比如res1资源，res2存放layout和values
 
              //默认路径是'src/main/'
              manifest.srcFile 'other/AndroidManifest.xml'
@@ -208,17 +200,14 @@ devV1Implementation()
      implementation fileTree(dir: 'libs', include: ['*.jar'])
 
      //单一产品风格纬度
-     //构建所有带v1的变体时都会引用，如：devV1Debug、devV1Preview、stableV1Preview、stableV1Release
-     v1Implementation files('libs_v1/v1.jar')
+     v1Implementation files('libs_v1/v1.jar') //构建所有带v1的变体时都会引用，如：devV1Debug、devV1Preview、stableV1Preview、stableV1Release
      v2Implementation files('libs/lib.jar')
 
-     //构建所有带dev的变体时都会引用，如：devV1Debug、devV1Preview、devV2Debug、devV2Preview
-     devImplementation files('lib_dev/dev.jar')
+     devImplementation files('lib_dev/dev.jar') //构建所有带dev的变体时都会引用，如：devV1Debug、devV1Preview、devV2Debug、devV2Preview
      stableImplementation files('libs/lib.jar')
 
      //复合产品风格纬度
-     //构建所有带dev、v1的变体时都会引用，如：devV1Debug、devV1Preview
-     devV1Implementation files('lib_dev_v1/dev_v1.jar')
+     devV1Implementation files('lib_dev_v1/dev_v1.jar')  //构建所有带dev、v1的变体时都会引用，如：devV1Debug、devV1Preview
 
      //该方式也支持远程依赖
  }
