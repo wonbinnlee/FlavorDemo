@@ -193,25 +193,25 @@ Gradle 会为我们定义好的产品风格生成对应的 implementation DLS �
 //build.gradle 文件
 //默认情况下只会生成产品风格单一纬度的DSL函数，如果需要复合纬度的函数，需要先声明后使用，否则会提示错误：Could not find method
 devV1Implementation()
- configurations {
-     devV1Implementation
- }
+configurations {
+    devV1Implementation
+}
 
- dependencies {
-     implementation fileTree(dir: 'libs', include: ['*.jar'])
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-     //单一产品风格纬度
-     v1Implementation files('libs_v1/v1.jar') //构建所有带v1的变体时都会引用，如：devV1Debug、devV1Preview、stableV1Preview、stableV1Release
-     v2Implementation files('libs/lib.jar')
+    //单一产品风格纬度
+    v1Implementation files('libs_v1/v1.jar') //构建所有带v1的变体时都会引用，如：devV1Debug、devV1Preview、stableV1Preview、stableV1Release
+    v2Implementation files('libs/lib.jar')
 
-     devImplementation files('lib_dev/dev.jar') //构建所有带dev的变体时都会引用，如：devV1Debug、devV1Preview、devV2Debug、devV2Preview
-     stableImplementation files('libs/lib.jar')
+    devImplementation files('lib_dev/dev.jar') //构建所有带dev的变体时都会引用，如：devV1Debug、devV1Preview、devV2Debug、devV2Preview
+    stableImplementation files('libs/lib.jar')
 
-     //复合产品风格纬度
-     devV1Implementation files('lib_dev_v1/dev_v1.jar')  //构建所有带dev、v1的变体时都会引用，如：devV1Debug、devV1Preview
+    //复合产品风格纬度
+    devV1Implementation files('lib_dev_v1/dev_v1.jar')  //构建所有带dev、v1的变体时都会引用，如：devV1Debug、devV1Preview
 
-     //该方式也支持远程依赖
- }
+    //该方式也支持远程依赖
+}
 ```
 > PS：前面的所有设置都是针对内部代码结构的，但是除了内部结构的划分以外，对于外部依赖有时也需要针对不同产品风格进行选择性的依赖，比如 v1 到 v2 做了大量的重构，底层实现发生了改变，需要根据 v1 引用相应的 api ，根据 v2 又引用另外的 api 依赖，此时完全可以增加一层中间层 adapter 的接口抽象层，去引用有区别的底层实现，并把 adapter 层分别放到各自的源目录下，这样上层实现就只需要关注各自的 adapter 接口层即可。
 
@@ -219,32 +219,32 @@ devV1Implementation()
 Gradle 也可以设置一些看起来像系统属性或环境变量的项目属性，以便根据不同的构建变体定制不同的环境变量。直接在 gradle.properties 文件定义即可。
 ```java
 //gradle.properties文件
- //Setting a project property via a system property
- com.flavordemo.project.key.v1=v1_value
- com.flavordemo.project.key.v2=v2_value
- //Setting a project property via an environment variable
- COM_FALVORDEMO_PROJECT_key_dev=dev_value
- COM_FALVORDEMO_PROJECT_key_stable=stable_value
+//Setting a project property via a system property
+com.flavordemo.project.key.v1=v1_value
+com.flavordemo.project.key.v2=v2_value
+//Setting a project property via an environment variable
+COM_FALVORDEMO_PROJECT_key_dev=dev_value
+COM_FALVORDEMO_PROJECT_key_stable=stable_value
 ```
 ```java
- //build.gradle 文件
- android {
-     ...
-     applicationVariants.all { variant ->
-         variant.outputs.all { output ->
-             def names = variant.getName()
-             //channel变体特有属性
-             if (names.contains("dev")) {
-                 buildConfigField "String", "KEY_CHANNLEL", "\"${COM_FALVORDEMO_PROJECT_key_dev}\""
-             } else if (names.contains("stable")) {
-                 buildConfigField "String", "KEY_CHANNLEL", "\"${COM_FALVORDEMO_PROJECT_key_stable}\""
-             }
-             //公共属性
-             buildConfigField "String", "KEY_COMMON", "\"${COM_FALVORDEMO_PROJECT_key_common}\""
-         }
-     }
-     ...
- }
+//build.gradle 文件
+android {
+    ...
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def names = variant.getName()
+            //channel变体特有属性
+            if (names.contains("dev")) {
+                buildConfigField "String", "KEY_CHANNLEL", "\"${COM_FALVORDEMO_PROJECT_key_dev}\""
+            } else if (names.contains("stable")) {
+                buildConfigField "String", "KEY_CHANNLEL", "\"${COM_FALVORDEMO_PROJECT_key_stable}\""
+            }
+            //公共属性
+            buildConfigField "String", "KEY_COMMON", "\"${COM_FALVORDEMO_PROJECT_key_common}\""
+        }
+    }
+    ...
+}
 ```
 > PS：除了依赖关系以外，很多应用以及一些第三方sdk都具有各自的运行环境配置，常用的做法是把一部分值声明在 gradle.properties 文件里，然后在代码里使用 BuildConfig 类进行引用，如果代码层已经做了区分，那么相应的配置文件也需要修改时，就可以使用这个方法为每个不同的构建变体声明各自的值。另外，还可以通过 manifestPlaceholders 来为 AndroidManifest.xml 做一些差异化的配置，详细可以看回 buildTypes 的配置那里。
 
