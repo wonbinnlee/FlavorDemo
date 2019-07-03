@@ -1,0 +1,122 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.flavordemo"
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {//Android Studio 会默认自动为您创建debug和release这两种构建类型
+        release {
+            minifyEnabled false
+            manifestPlaceholders = [app_name: "app", app_icon: "@mipmap/ic_launcher"]
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            applicationIdSuffix ".debug"
+            manifestPlaceholders = [app_name: "app_debug", app_icon: "@mipmap/ic_launcher"]
+            debuggable true
+        }
+
+        preview {//增加了一个构建类型preview，
+            initWith debug //从debug构建类型复制属性
+            applicationIdSuffix ".preview"
+            manifestPlaceholders = [app_name: "app_preview", app_icon: "@mipmap/ic_launcher"]
+            //为不同版本声明了不同appname和appicon
+        }
+    }
+
+    flavorDimensions "channel", "version" //属于较高优先级风格维度的产品风格首先显示，之后是较低优先级维度的产品风格，再之后是构建类型。
+    productFlavors {
+        dev { //所有风格必须属于指定的风格维度
+            dimension "channel"
+            applicationIdSuffix ".dev" //com.flavordemo.dev.debug
+            versionNameSuffix "-dev" //1.0-dev
+        }
+
+        stable {
+            dimension "channel"
+            applicationIdSuffix ".stable"
+            versionNameSuffix "-stable"
+        }
+
+        v1 { //所有风格命名必须是字符串类型
+            dimension "version"
+            versionName "V1." + android.defaultConfig.versionName //V1.1.0-dev
+            versionCode 10000 + android.defaultConfig.versionCode //10001
+        }
+
+        v2 {
+            dimension "version"
+            versionName "V2." + android.defaultConfig.versionName
+            versionCode 20000 + android.defaultConfig.versionCode
+        }
+    }
+
+    variantFilter { variant ->
+        def names = variant.getName() //获取完整的build variant名称，如：devV1Debug
+        if ((names.contains("dev") && names.contains("Release")) //没有dev分支且release的版本，也没有stable分支且debug的版本
+                || (names.contains("stable") && names.contains("Debug"))) {
+            setIgnore(true) //设置忽略
+        }
+    }
+
+    sourceSets {
+        v1 { //把v1变体的所有资源指向other目录
+            //v2默认路径是'src/main/java'
+            java.srcDirs = ['other/java']
+
+            //v2默认路径是'src/main/res'
+            res.srcDirs = ['other/res1', 'other/res2/layouts', 'other/res2/strings'] //指定多个资源目录，比如res1资源，res2存放layout和values
+
+            //v2默认路径是'src/main/'
+            manifest.srcFile 'other/AndroidManifest.xml'
+        }
+
+        debug { //指定debug变体使用特定的so文件目录
+            jniLibs.srcDirs = ['src/debug/jniLibs_debug']
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def names = variant.getName()
+            if (names.contains("dev")) {
+                //channel变体特有属性
+                buildConfigField "String", "KEY_CHANNLEL", "\"${COM_FALVORDEMO_PROJECT_key_dev}\""
+            } else if (names.contains("stable")) {
+                buildConfigField "String", "KEY_CHANNLEL", "\"${COM_FALVORDEMO_PROJECT_key_stable}\""
+            }
+            //公共属性
+            buildConfigField "String", "KEY_COMMON", "\"${COM_FALVORDEMO_PROJECT_key_common}\""
+        }
+    }
+
+}
+
+configurations { //默认情况下只会生成产品风格单一纬度的DSL函数，如果需要复合纬度的implementation函数，需要先声明才能使用，否则会提示找不到Could not find method devV1Implementation()
+    devV1Implementation
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //单一产品风格纬度
+    v1Implementation files('libs_v1/v1.jar') //构建所有带v1的变体时都会引用，如：devV1Debug、devV1Preview、stableV1Preview、stableV1Release
+    v2Implementation files('libs/lib.jar')
+
+    devImplementation files('lib_dev/dev.jar') //构建所有带dev的变体时都会引用，如：devV1Debug、devV1Preview、devV2Debug、devV2Preview
+    stableImplementation files('libs/lib.jar')
+    //复合产品风格纬度
+    devV1Implementation files('lib_dev_v1/dev_v1.jar') //构建所有带dev、v1的变体时都会引用，如：devV1Debug、devV1Preview
+
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
