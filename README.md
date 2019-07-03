@@ -39,7 +39,8 @@ Gradle 本身就支持这种方式的配置，每个构建变体都代表不同�
      }
      ...
  }
-
+```
+```java
  //AndroidManifest.xml
  <application
      ...
@@ -84,8 +85,8 @@ android {
    }
    ...
 }
-
-
+```
+```java
 //BuildConfig.java
 public final class BuildConfig {
    public static final boolean DEBUG = Boolean.parseBoolean("true");
@@ -224,8 +225,8 @@ Gradle 也可以设置一些看起来像系统属性或环境变量的项目属�
  //Setting a project property via an environment variable
  COM_FALVORDEMO_PROJECT_key_dev=dev_value
  COM_FALVORDEMO_PROJECT_key_stable=stable_value
-
-
+```
+```java
  //build.gradle 文件
  android {
      ...
