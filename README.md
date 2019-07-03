@@ -261,6 +261,9 @@ Gradle 也可以设置一些看起来像系统属性或环境变量的项目属�
 ## 最后
 以上就是 Gradle 提供的所有相关配置，通过设置，项目的所有代码可以保留在一个工程内部，结合不同的配置以及资源文件最终可以高效管理工程，代码及资源管理只需要维护不同产品风格差异化的那一部分。由于 AndroidStudio 原生支持这种管理方式，大大减少了维护的人力及时间投入，无论产品线怎么变化都可以方便的扩展。
 
+如有问题可以关注我的公众号留言：  
+![公众号](https://mmbiz.qpic.cn/mmbiz_jpg/KZYic25zrWRviaLBMia8djBc9S0Uon3nfQE2uyMv6O2lyC8L80wpRyflFtg190UAxBTZQxhnZsQ6gNkMhRts1bpHg/0?wx_fmt=jpeg)
+
 ---
 <font color=Gray size=2>参考：
 https://developer.android.com/studio/build/build-variants</font>
