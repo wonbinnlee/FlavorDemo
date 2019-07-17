@@ -52,7 +52,7 @@ android {
 > PS：一般情况下，我们都不需要在 buildTypes 里增加自己的构建类型，默认的 debug 以及 release 已经足够，但是可以针对 debug 和 release 配置不同的属性，比如：release 版本需要混淆，签名文件不同，开启资源压缩等等。
 
 ## 配置productFlavors产品风格
-创建产品风格与创建构建类型相似：只需将其添加到构建配置中的 productFlavors 代码块并加入所需的设置即可。产品风格支持与 defaultConfig 相同的属性，这是因为 defaultConfig 实际上属于 ProductFlavor 类。
+创建产品风格与创建构建类型相似：只需将其添加到构建配置中的 productFlavors 代码块并加入所需的设置即可。产品风格支持与 [defaultConfig](https://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.DefaultConfig.html) 相同的属性，这是因为 defaultConfig 实际上属于 ProductFlavor 类。
 ```java
 //build.gradle 文件
 android {
@@ -108,7 +108,7 @@ public final class BuildConfig {
     构建变体：devV1Debug
     对应 APK：app-dev-v1-debug.apk
 
-> PS：大多数时候，我们都是在该代码块中配置自己的产品风格，首先要做的是确定产品的纬度应该怎么划分，常见的划分纬度是按机型划分，按 api 级别划分，以及应用版本划分。所有 defaultConfig 能支持的配置，在这里都可以使用。配置的优先顺序是按照 flavorDimensions 从左往右的次序，最后才是 buildTypes。
+> PS：大多数时候，我们都是在该代码块中配置自己的产品风格，首先要做的是确定产品的纬度应该怎么划分，常见的划分纬度是按机型划分，按 api 级别划分，以及应用版本划分。所有 defaultConfig 能支持的配置，在这里都可以使用。配置的优先覆盖顺序是按照 flavorDimensions 从左往右的次序，最后才是defaultConfig。另外，所有带"fuffix"结尾的DSL都是采用拼接的原则。
 
 ## 过滤变体
 Gradle 会配置的产品风格与构建类型的每个可能的组合创建构建变体。不过，某些特定的构建变体在项目环境中并不必要，也可能没有意义。可以在模块级 build.gradle 文件中创建一个变体过滤器，以移除某些构建变体配置。
@@ -156,7 +156,18 @@ Android Studio 将会为debug构建类型创建源集目录，然后在该目录
 按照同样的方法，还可以为产品风格创建源集目录（例如 src/stable/），为构建变体创建源集目录（例如 src/stableV2/）。此外，还可以创建针对特定构建变体的测试源集，例如 src/androidTestStableDebug/。下图为Android Studio提示的源集目录：
 
 ![源集目录](https://mmbiz.qpic.cn/mmbiz_png/KZYic25zrWRveqSibyaEWATpn9zTKHZNyq3T9Z5fonu0Yc4eYTlDJWQbIud3zKCmNmOlpJj9Z4S8AXEEuRLpkw0w/0?wx_fmt=png)
-> PS：使用 AndroidStudio 提供的创建向导，我们可以方便的为产品建立不同的资源目录。建立资源目录主要的作用是区分不同产品风格差异化的实现。配置合并的规则是：productFlavors > buildTypes > defaultConfig，意思是 productFlavors 里重复定义的会覆盖buildTypes里重复定义的，buildTypes里定义的会覆盖defaultConfig。另外 productFlavors 内部的覆盖规则是根据 flavorDimensions 定义的倒序覆盖。
+> PS：[源集合并规则](https://developer.android.com/studio/build/manifest-merge.html?hl=zh-CN)：
+Gradle 会查看这些目录并赋予以下优先级顺序：
+src/demoDebug/（构建变体源集）
+src/debug/（构建类型源集）
+src/demo/（产品风格源集）
+src/main/（主源集）
+上面列出的顺序决定了在 Gradle 合并代码和资源时哪个源集具有较高的优先级。由于 demoDebug/ 源集目录很可能包含特定于该构建变体的文件，如果 demoDebug/ 包含在 debug/ 中也有定义的文件，Gradle 将使用 demoDebug/ 源集中的文件。同样，Gradle 会为构建类型和产品风格源集中的文件赋予比 main/ 中相同文件更高的优先级。Gradle 在应用以下构建规则时会考虑此优先级顺序：
+一起编译 java/ 目录中的所有源代码以生成单一的输出。同时flavor定义的类不能与main中定义的类重名。
+所有AndroidMenifest.xml合并为单个清单。将按照上述列表中的相同顺序指定优先级。也就是说，某个构建类型的清单设置会替换某个产品风格的清单设置，依此类推。
+values/ 目录中的文件也会合并在一起。如果两个文件同名，例如存在两个 strings.xml 文件，将按照上述列表中的相同顺序指定优先级。也就是说，在构建类型源集中的文件中定义的值将会替换产品风格中同一文件中定义的值，依此类推。
+res/ 和 asset/ 目录中的资源将打包到一起。如果两个或两个以上的源集中定义有同名资源，将按照上述列表中的相同顺序指定优先级。
+最后，在构建 APK 时，Gradle 会为随库模块依赖项包含的资源和清单分配最低的优先级。
 
 ## 更改默认源配置
 如果源未组织到 Gradle 期望的默认源集文件结构中（如上面的创建源集部分中所述），可以使用 sourceSets 代码块更改 Gradle 希望为源集的每个组件收集文件的位置。
@@ -256,4 +267,7 @@ android {
 
 ---
 <font color=Gray size=2>参考：
-https://developer.android.com/studio/build/build-variants</font>
+https://developer.android.com/studio/build/build-variants
+https://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.DefaultConfig.html
+https://developer.android.com/studio/build/manifest-merge.html?hl=zh-CN
+</font>
